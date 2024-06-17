@@ -1,0 +1,22 @@
+.container {
+  background-color: var(--mantine-colors-dark-8);
+  margin-block: var(--mantine-spacing-md);
+  margin-inline: auto;
+  width: 90vw;
+  max-width: rem(400px);
+}
+
+.input,
+.input-error {
+  text-align: center;
+}
+
+.modal-title {
+  font-size: var(--mantine-font-size-md);
+}
+
+.stats-info {
+  border: rem(1px) solid;
+  border-radius: rem(4px);
+  border-color: var(--mantine-colors-teal-5);
+}
