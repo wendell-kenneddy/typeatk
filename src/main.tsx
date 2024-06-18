@@ -13,9 +13,10 @@ const theme = createTheme({
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <MantineProvider defaultColorScheme="dark" theme={theme}>
-      <App />
-    </MantineProvider>
-  </React.StrictMode>
+  // Strict mode messes up timings, be careful when using it
+  // <React.StrictMode>
+  <MantineProvider defaultColorScheme="dark" theme={theme}>
+    <App />
+  </MantineProvider>
+  // </React.StrictMode>
 );
