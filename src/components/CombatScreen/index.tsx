@@ -1,7 +1,6 @@
 import {
   Box,
   Button,
-  Loader,
   Modal,
   Progress,
   Stack,
@@ -14,45 +13,56 @@ import styles from "./CombatScreen.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
 import { millisToFormattedTime } from "../../utils/millisToFormattedTime";
+import { getRandomWord } from "../../utils/getRandomWord";
+import { DifficultyModifier } from "../../data/difficultyModifiers";
 
 interface CombatScreenProps {
-  totalTime: number;
-  wordDamage: number;
+  difficultyModifier: DifficultyModifier;
+  onExitScreen: () => void;
 }
 
-export interface GameStatus {
-  remainingTime: number;
-  totalTime: number;
-  bossHp: number;
-  words: string[];
-  targetWord: string;
-  typedWord: string;
-  bossScore: number | null;
-  timeScore: number | null;
-}
-
-export function CombatScreen({ totalTime, wordDamage }: CombatScreenProps) {
+export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenProps) {
   const [opened, { close, open }] = useDisclosure(false);
-  const [currentTime, setCurrentTime] = useState(totalTime);
-  const [words, setWords] = useState<string[]>([]);
+  const [remainingTime, setRemainingTime] = useState(difficultyModifier.totalTime);
   const [targetWord, setTargetWord] = useState("");
   const [typedWord, setTypedWord] = useState("");
   const [bossHp, setBossHp] = useState(100);
   const intervalRef = useRef(0);
-  const gameEnded = bossHp <= 0 || currentTime <= 0;
+  const gameEnded = bossHp <= 0 || remainingTime <= 0;
   const error =
     targetWord && targetWord.substring(0, typedWord.length) != typedWord ? "Wrong word!" : null;
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  function calculateTimeScore() {
-    return (currentTime / totalTime) * 1000;
+  function restart() {
+    close();
+    setTargetWord(getRandomWord());
+    setTypedWord("");
+    setBossHp(100);
+    setRemainingTime(difficultyModifier.totalTime);
+    intervalRef.current = setInterval(() => {
+      setRemainingTime((t) => t - 10);
+    }, 10);
+    inputRef.current?.focus();
   }
 
-  function calculateBossScore() {
-    return (1 - bossHp / 100) * 1000;
+  function getTimeScore() {
+    return Math.round((remainingTime / difficultyModifier.totalTime) * 1000);
+  }
+
+  function getBossScore() {
+    return Math.round((1 - bossHp / 100) * 1000);
   }
 
   useEffect(() => {
-    if (bossHp <= 0 && currentTime > 0) {
+    inputRef.current?.focus();
+    setTargetWord(getRandomWord());
+    intervalRef.current = setInterval(() => {
+      setRemainingTime((t) => t - 10);
+    }, 10);
+  }, []);
+
+  useEffect(() => {
+    if (bossHp <= 0 && remainingTime > 0) {
       clearInterval(intervalRef.current);
       setTargetWord("");
       setTypedWord("");
@@ -61,37 +71,20 @@ export function CombatScreen({ totalTime, wordDamage }: CombatScreenProps) {
       return;
     }
 
-    if (bossHp > 0 && currentTime <= 0) {
+    if (bossHp > 0 && remainingTime <= 0) {
       clearInterval(intervalRef.current);
       setTargetWord("");
       setTypedWord("");
       open();
       return;
     }
-  }, [bossHp, currentTime]);
-
-  useEffect(() => {
-    fetch("https://random-word-api.herokuapp.com/word?number=50")
-      .then((data) => data.json())
-      .then((newWords) => {
-        const word = newWords[Math.round(Math.random() * 50)];
-        setWords(newWords);
-        setTargetWord(word);
-      })
-      .then(() => {
-        intervalRef.current = setInterval(() => {
-          setCurrentTime((t) => t - 10);
-        }, 10);
-      })
-      .catch((err) => console.log(err));
-  }, []);
+  }, [bossHp, remainingTime]);
 
   if (!gameEnded && targetWord.length && targetWord == typedWord) {
-    const newWord = words[Math.round(Math.random() * 50)];
-    setTargetWord(newWord);
+    setTargetWord(getRandomWord());
     setTypedWord("");
-    setBossHp(bossHp - wordDamage);
-    setCurrentTime((t) => t + 1000);
+    setBossHp(bossHp - difficultyModifier.damagePerWord);
+    setRemainingTime((t) => t + difficultyModifier.bonusTimePerWord);
   }
 
   return (
@@ -105,7 +98,7 @@ export function CombatScreen({ totalTime, wordDamage }: CombatScreenProps) {
           <Progress
             aria-label="Remaining time percentage"
             color="orange"
-            value={(currentTime / totalTime) * 100}
+            value={(remainingTime / difficultyModifier.totalTime) * 100}
             transitionDuration={200}
             w="100%"
           />
@@ -117,30 +110,25 @@ export function CombatScreen({ totalTime, wordDamage }: CombatScreenProps) {
             value={Math.round((bossHp / 100) * 100)}
           />
 
-          <Text size="sm">{millisToFormattedTime(currentTime)}</Text>
+          <Text size="sm">{millisToFormattedTime(remainingTime)}</Text>
         </Stack>
 
         <Box my="md" mx="auto" w="150px" h="150px" bg="teal" />
 
         <Stack bg="dark" gap="md" align="center" justify="center" py="md">
-          {!words.length ? (
-            <Loader />
-          ) : (
-            <>
-              <Text c="teal" size="lg">
-                {targetWord}
-              </Text>
+          <Text c="teal" size="lg">
+            {targetWord}
+          </Text>
 
-              <TextInput
-                disabled={bossHp <= 0}
-                classNames={{ input: styles.input, error: styles["input-error"] }}
-                aria-label="Type the word you see above"
-                onChange={(e) => setTypedWord(e.target.value)}
-                value={typedWord}
-                error={error}
-              />
-            </>
-          )}
+          <TextInput
+            disabled={bossHp <= 0}
+            classNames={{ input: styles.input, error: styles["input-error"] }}
+            aria-label="Type the word you see above"
+            onChange={(e) => setTypedWord(e.target.value)}
+            value={typedWord}
+            error={error}
+            ref={inputRef}
+          />
         </Stack>
       </div>
 
@@ -148,7 +136,6 @@ export function CombatScreen({ totalTime, wordDamage }: CombatScreenProps) {
         classNames={{ title: styles["modal-title"] }}
         opened={opened}
         onClose={close}
-        title="Final stats"
         centered
         closeOnClickOutside={false}
         withCloseButton={false}
@@ -160,19 +147,41 @@ export function CombatScreen({ totalTime, wordDamage }: CombatScreenProps) {
           </Title>
 
           <Stack w="100%" p="xs" gap="xs" className={styles["stats-info"]}>
-            <Text c="teal">
-              Score: {Math.round(calculateBossScore()) + Math.round(calculateTimeScore())}
+            <Text c="teal" size="lg">
+              Score:{" "}
+              {Math.round(
+                (difficultyModifier.bonusScore + getBossScore() + getTimeScore()) *
+                  difficultyModifier.finalScoreMultiplier
+              )}
             </Text>
-            <Text c="orange">
-              Remaining time: {millisToFormattedTime(currentTime)}s (
-              {Math.round(calculateTimeScore())}pts)
+
+            <Text c="orange" size="sm">
+              Remaining time: {millisToFormattedTime(remainingTime)}s ({Math.round(getTimeScore())}
+              pts)
             </Text>
-            <Text c="red">Boss score: {Math.round(calculateBossScore())}pts</Text>
+
+            <Text c="red" size="sm">
+              Boss score: {getBossScore()}pts
+            </Text>
+
+            <Text c="cyan" size="sm">
+              Difficulty multiplier: {difficultyModifier.finalScoreMultiplier}x
+            </Text>
+
+            <Text c="cyan" size="sm">
+              Bonus: {difficultyModifier.bonusScore}pts
+            </Text>
           </Stack>
 
-          <Button w="100%" color="teal">
-            Play again
-          </Button>
+          <Stack w="100%" gap="xs">
+            <Button w="100%" color="teal" onClick={restart}>
+              Play again
+            </Button>
+
+            <Button w="100%" color="teal" onClick={onExitScreen}>
+              Change difficulty
+            </Button>
+          </Stack>
         </Stack>
       </Modal>
     </>
