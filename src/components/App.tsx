@@ -9,7 +9,7 @@ export function App() {
 
       <main>
         {/* <DifficultySelect /> */}
-        <CombatScreen totalTime={1000 * 30} />
+        <CombatScreen totalTime={1000 * 15} wordDamage={15} />
       </main>
     </>
   );
