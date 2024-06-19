@@ -1,11 +1,16 @@
-import { Center, Title } from "@mantine/core";
+import { Center } from "@mantine/core";
 
 export function Header() {
   return (
     <Center component="header" w="100%" py="sm" bg="dark">
-      <Title size="h3" order={1}>
-        typeATK
-      </Title>
+      <img
+        src="/logo.svg"
+        alt="Logo image"
+        decoding="sync"
+        loading="eager"
+        width={103}
+        height={36}
+      />
     </Center>
   );
 }
