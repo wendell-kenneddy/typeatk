@@ -3,7 +3,7 @@ import { CombatScreen } from "./CombatScreen";
 import { DifficultySelect } from "./DifficultySelect";
 import { Header } from "./Header";
 import { Difficulty, difficultyModifiers } from "../data/difficultyModifiers";
-import { Tabs } from "@mantine/core";
+import { Stack, Tabs } from "@mantine/core";
 import { MatchHistory } from "./MatchHistory";
 
 export function App() {
@@ -27,7 +27,16 @@ export function App() {
             </Tabs.List>
 
             <Tabs.Panel value="difficulty-select">
-              <DifficultySelect onConfirmDifficulty={(d) => setSelectedDifficulty(d)} />
+              <Stack gap="xs" align="center">
+                <DifficultySelect onConfirmDifficulty={(d) => setSelectedDifficulty(d)} />
+
+                <img
+                  src="/typing-bro.svg"
+                  alt="Typing on a keyboard illustration"
+                  width={200}
+                  height={200}
+                />
+              </Stack>
             </Tabs.Panel>
 
             <Tabs.Panel value="match-history">
