@@ -1,0 +1,7 @@
+.container {
+  padding-block: var(--mantine-spacing-md);
+  padding-inline: var(--mantine-spacing-sm);
+  width: 90vw;
+  max-width: rem(375px);
+  margin: var(--mantine-spacing-md) auto;
+}
