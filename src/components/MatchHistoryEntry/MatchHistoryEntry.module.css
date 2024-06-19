@@ -1,0 +1,4 @@
+.container {
+  border-radius: rem(4px);
+  border: 1px solid var(--mantine-color-teal-4);
+}
