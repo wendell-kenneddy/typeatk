@@ -1,4 +1,4 @@
-import { Button, Text, Title } from "@mantine/core";
+import { Button, Stack, Text } from "@mantine/core";
 import { MatchResult } from "../CombatScreen";
 import { MatchHistoryEntry } from "../MatchHistoryEntry";
 import { useState } from "react";
@@ -33,9 +33,11 @@ export function MatchHistory() {
           </ul>
         </>
       ) : (
-        <Title order={2} size="md">
-          Wow, so empty...
-        </Title>
+        <Stack gap="xs" align="center">
+          <Text>Wow, so empty...</Text>
+
+          <img src="/empty-amico.svg" alt="Empty shelf illustration" width={200} height={200} />
+        </Stack>
       )}
     </div>
   );
