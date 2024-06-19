@@ -1,0 +1,5 @@
+.stats-info {
+  border: rem(1px) solid;
+  border-radius: rem(4px);
+  border-color: var(--mantine-colors-teal-5);
+}
