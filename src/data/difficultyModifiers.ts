@@ -1,6 +1,7 @@
 export type Difficulty = "easy" | "normal" | "hard";
 
 export interface DifficultyModifier {
+  bossImg: string;
   name: string;
   damagePerWord: number;
   totalTime: number;
@@ -9,6 +10,7 @@ export interface DifficultyModifier {
 }
 
 const easy: DifficultyModifier = {
+  bossImg: "/easy-boss.png",
   name: "Easy",
   damagePerWord: 13,
   totalTime: 23 * 1000,
@@ -17,6 +19,7 @@ const easy: DifficultyModifier = {
 };
 
 const normal: DifficultyModifier = {
+  bossImg: "/normal-boss.png",
   name: "Normal",
   damagePerWord: 9,
   totalTime: 23 * 1000,
@@ -25,6 +28,7 @@ const normal: DifficultyModifier = {
 };
 
 const hard: DifficultyModifier = {
+  bossImg: "/hard-boss.png",
   name: "Hard",
   damagePerWord: 7,
   totalTime: 20 * 1000,
