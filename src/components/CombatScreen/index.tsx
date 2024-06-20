@@ -1,4 +1,4 @@
-import { Box, Button, Modal, Stack, Text, TextInput, VisuallyHidden } from "@mantine/core";
+import { Box, Button, Image, Modal, Stack, Text, TextInput, VisuallyHidden } from "@mantine/core";
 import styles from "./CombatScreen.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
@@ -33,6 +33,7 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
   const [bossHp, setBossHp] = useState(100);
   const intervalRef = useRef<number | undefined>(undefined);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const imgRef = useRef<HTMLImageElement | null>(null);
   const error =
     targetWord && targetWord.substring(0, typedWord.length) != typedWord ? "Wrong word!" : null;
   const gameEnded = bossHp <= 0 || remainingTime <= 0;
@@ -40,11 +41,11 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
   useEffect(() => {
     inputRef.current?.focus();
     setTargetWord(getRandomWord());
-    if (!intervalRef.current) {
-      intervalRef.current = setInterval(() => {
-        setRemainingTime((t) => t - 10);
-      }, 10);
-    }
+    // if (!intervalRef.current) {
+    //   intervalRef.current = setInterval(() => {
+    //     setRemainingTime((t) => t - 10);
+    //   }, 10);
+    // }
   }, []);
 
   useEffect(() => {
@@ -86,6 +87,7 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
     intervalRef.current = setInterval(() => {
       setRemainingTime((t) => t - 10);
     }, 10);
+    if (imgRef.current) imgRef.current.style.opacity = "1";
     inputRef.current?.focus();
   }
 
@@ -111,6 +113,10 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
     setTypedWord("");
     setBossHp(bossHp - difficultyModifier.damagePerWord);
     setRemainingTime((t) => t + difficultyModifier.bonusTimePerWord);
+    if (imgRef.current) {
+      const newOpacity = `${(bossHp - difficultyModifier.damagePerWord) / 100}`;
+      imgRef.current.style.opacity = newOpacity;
+    }
   }
 
   return (
@@ -126,7 +132,16 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
           remainingBossHpPercentage={bossHp}
         />
 
-        <Box my="md" mx="auto" w="150px" h="150px" bg="teal" />
+        <Box bg="red" w={150} h={150} my="md" mx="auto">
+          <img
+            src={difficultyModifier.bossImg}
+            alt="Boss image"
+            width={150}
+            height={150}
+            loading="eager"
+            ref={imgRef}
+          />
+        </Box>
 
         <Stack bg="dark" gap="md" align="center" justify="center" py="md">
           <Text c="teal" size="lg">
