@@ -1,4 +1,4 @@
-import { Box, Button, Image, Modal, Stack, Text, TextInput, VisuallyHidden } from "@mantine/core";
+import { Box, Button, Modal, Stack, Text, TextInput, VisuallyHidden } from "@mantine/core";
 import styles from "./CombatScreen.module.css";
 import { useDisclosure } from "@mantine/hooks";
 import { useEffect, useRef, useState } from "react";
@@ -41,14 +41,20 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
   useEffect(() => {
     inputRef.current?.focus();
     setTargetWord(getRandomWord());
-    // if (!intervalRef.current) {
-    //   intervalRef.current = setInterval(() => {
-    //     setRemainingTime((t) => t - 10);
-    //   }, 10);
-    // }
+    if (!intervalRef.current) {
+      intervalRef.current = setInterval(() => {
+        setRemainingTime((t) => t - 10);
+      }, 10);
+    }
   }, []);
 
   useEffect(() => {
+    if (bossHp > 0 && remainingTime > 0) {
+      if (inputRef.current && document.activeElement != inputRef.current) {
+        inputRef.current.focus();
+      }
+    }
+
     if (bossHp <= 0 && remainingTime > 0) {
       clearInterval(intervalRef.current);
       setTargetWord("");
@@ -88,7 +94,6 @@ export function CombatScreen({ difficultyModifier, onExitScreen }: CombatScreenP
       setRemainingTime((t) => t - 10);
     }, 10);
     if (imgRef.current) imgRef.current.style.opacity = "1";
-    inputRef.current?.focus();
   }
 
   function getMatchResult(): MatchResult {
